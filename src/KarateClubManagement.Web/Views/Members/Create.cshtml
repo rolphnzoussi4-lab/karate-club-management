@@ -1,0 +1,40 @@
+@model IEnumerable<Member>
+
+<h2>Membres</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Ajouter un membre</a>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Rechercher par nom, prénom, email" />
+        <button type="submit" class="btn btn-outline-secondary">Rechercher</button>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Grade</th>
+            <th>Inscription</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var member in Model)
+    {
+        <tr>
+            <td>@member.LastName</td>
+            <td>@member.FirstName</td>
+            <td>@member.Email</td>
+            <td>@member.Grade</td>
+            <td>@member.DateOfRegistration.ToString("dd/MM/yyyy")</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@member.Id" class="btn btn-sm btn-warning">Modifier</a>
+                <a asp-action="Delete" asp-route-id="@member.Id" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

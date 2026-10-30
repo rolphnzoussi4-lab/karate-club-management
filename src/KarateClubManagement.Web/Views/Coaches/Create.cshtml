@@ -1,0 +1,25 @@
+@model IEnumerable<Coach>
+
+<h2>Entraîneurs</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Ajouter un entraîneur</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr><th>Nom</th><th>Spécialité</th><th>Grade</th><th>Email</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var coach in Model)
+        {
+            <tr>
+                <td>@coach.FirstName @coach.LastName</td>
+                <td>@coach.Speciality</td>
+                <td>@coach.Grade</td>
+                <td>@coach.Email</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@coach.Id" class="btn btn-sm btn-warning">Modifier</a>
+                    <a asp-action="Delete" asp-route-id="@coach.Id" class="btn btn-sm btn-danger">Supprimer</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

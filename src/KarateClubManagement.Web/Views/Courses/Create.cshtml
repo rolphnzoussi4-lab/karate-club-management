@@ -1,0 +1,26 @@
+@model IEnumerable<Course>
+
+<h2>Cours</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Créer un cours</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr><th>Nom</th><th>Date</th><th>Heure</th><th>Salle</th><th>Entraîneur</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var course in Model)
+        {
+            <tr>
+                <td>@course.Name</td>
+                <td>@course.Date.ToString("dd/MM/yyyy")</td>
+                <td>@course.StartTime - @course.EndTime</td>
+                <td>@course.Room</td>
+                <td>@course.Coach?.FirstName @course.Coach?.LastName</td>
+                <td>
+                    <a asp-action="Register" asp-route-id="@course.Id" class="btn btn-sm btn-success">Inscrire</a>
+                    <a asp-action="Attendance" asp-route-id="@course.Id" class="btn btn-sm btn-info">Présences</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

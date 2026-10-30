@@ -1,0 +1,147 @@
+using KarateClubManagement.Business.Models;
+using KarateClubManagement.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace KarateClubManagement.Business.Services;
+
+public interface IDashboardService
+{
+    Task<DashboardSummaryViewModel> GetDashboardSummaryAsync();
+}
+
+public class DashboardService : IDashboardService
+{
+    private readonly KarateClubDbContext _context;
+
+    public DashboardService(KarateClubDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<DashboardSummaryViewModel> GetDashboardSummaryAsync()
+    {
+        var members = await _context.Members
+            .Include(m => m.GradeHistory)
+            .ToListAsync();
+
+        var totalMembers = members.Count;
+        var gradeDistribution = members
+            .GroupBy(m => m.Grade)
+            .Select(g => new GradeDistributionItem
+            {
+                Grade = g.Key.ToString(),
+                Count = g.Count()
+            })
+            .OrderBy(x => x.Grade)
+            .ToList();
+
+        var currentMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        var monthlyRevenue = await _context.Payments
+            .Where(p => p.PaidDate.HasValue && p.PaidDate.Value >= currentMonthStart)
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+        var upcomingCourses = await _context.Courses
+            .Include(c => c.Coach)
+            .Where(c => c.Date >= DateTime.Today)
+            .OrderBy(c => c.Date)
+            .Take(5)
+            .ToListAsync();
+
+        var latePayments = await _context.Payments
+            .Include(p => p.Member)
+            .Where(p => p.Status == PaymentStatus.Late || (p.Status == PaymentStatus.Pending && p.DueDate < DateTime.Today))
+            .OrderBy(p => p.DueDate)
+            .Take(10)
+            .ToListAsync();
+
+        return new DashboardSummaryViewModel
+        {
+            TotalMembers = totalMembers,
+            GradeDistribution = gradeDistribution,
+            MonthlyRevenue = monthlyRevenue,
+            UpcomingCourses = upcomingCourses,
+            LatePayments = latePayments
+        };
+    }
+}
+
+public interface IPaymentService
+{
+    Task<List<Payment>> GetLatePaymentsAsync();
+    Task MarkAsPaidAsync(int paymentId);
+    Task<List<Payment>> GetPaymentsForMemberAsync(int memberId);
+}
+
+public class PaymentService : IPaymentService
+{
+    private readonly KarateClubDbContext _context;
+
+    public PaymentService(KarateClubDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<List<Payment>> GetLatePaymentsAsync()
+    {
+        return await _context.Payments
+            .Include(p => p.Member)
+            .Where(p => p.Status == PaymentStatus.Late || (p.Status == PaymentStatus.Pending && p.DueDate < DateTime.Today))
+            .OrderBy(p => p.DueDate)
+            .ToListAsync();
+    }
+
+    public async Task MarkAsPaidAsync(int paymentId)
+    {
+        var payment = await _context.Payments.FindAsync(paymentId);
+        if (payment is null) return;
+
+        payment.Status = PaymentStatus.Paid;
+        payment.PaidDate = DateTime.Today;
+        payment.ReceiptNumber = $"RCPT-{DateTime.UtcNow:yyyyMMddHHmmss}-{paymentId}";
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<Payment>> GetPaymentsForMemberAsync(int memberId)
+    {
+        return await _context.Payments
+            .Where(p => p.MemberId == memberId)
+            .OrderByDescending(p => p.DueDate)
+            .ToListAsync();
+    }
+}
+
+public interface IPdfService
+{
+    byte[] GenerateReceiptPdf(Payment payment, Member member);
+}
+
+public class PdfService : IPdfService
+{
+    public byte[] GenerateReceiptPdf(Payment payment, Member member)
+    {
+        var document = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(QuestPDF.Helpers.PageSizes.A4);
+                page.Margin(40);
+                page.Header().Text("Reçu de paiement - Club de Karaté").SemiBold().FontSize(20);
+                page.Content().Column(column =>
+                {
+                    column.Spacing(12);
+                    column.Item().Text($"Membre : {member.FirstName} {member.LastName}");
+                    column.Item().Text($"Email : {member.Email}");
+                    column.Item().Text($"Type : {payment.FeeType}");
+                    column.Item().Text($"Montant : {payment.Amount:F2} €");
+                    column.Item().Text($"Date d'échéance : {payment.DueDate:dd/MM/yyyy}");
+                    column.Item().Text($"Date de paiement : {payment.PaidDate?.ToString("dd/MM/yyyy") ?? "-"}");
+                    column.Item().Text($"Référence : {payment.ReceiptNumber}");
+                });
+                page.Footer().AlignCenter().Text("Merci pour votre confiance.");
+            });
+        });
+
+        return document.GeneratePdf();
+    }
+}

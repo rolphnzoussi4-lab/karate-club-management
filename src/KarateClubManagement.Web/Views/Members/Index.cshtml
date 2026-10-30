@@ -1,0 +1,77 @@
+@model KarateClubManagement.Business.Models.DashboardSummaryViewModel
+@{
+    ViewData["Title"] = "Tableau de bord";
+}
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6>Total membres</h6>
+                <h2>@Model.TotalMembers</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6>Recettes mensuelles</h6>
+                <h2>@Model.MonthlyRevenue.ToString("F2") €</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h6>Retards de paiement</h6>
+                <h2>@Model.LatePayments.Count</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6>Prochains cours</h6>
+                <h2>@Model.UpcomingCourses.Count</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Répartition par grade</div>
+            <div class="card-body">
+                @foreach (var item in Model.GradeDistribution)
+                {
+                    <div class="d-flex justify-content-between">
+                        <span>@item.Grade</span>
+                        <span>@item.Count</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Prochains événements</div>
+            <div class="card-body">
+                @if (Model.UpcomingCourses.Any())
+                {
+                    foreach (var course in Model.UpcomingCourses)
+                    {
+                        <div class="border-bottom py-2">
+                            <strong>@course.Name</strong><br />
+                            @course.Date.ToString("dd/MM/yyyy") - @course.Room
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Aucun cours planifié.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

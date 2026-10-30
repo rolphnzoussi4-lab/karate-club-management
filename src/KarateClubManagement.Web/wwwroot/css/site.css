@@ -1,0 +1,32 @@
+@model IEnumerable<Payment>
+
+<h2>Paiements</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr><th>Membre</th><th>Type</th><th>Montant</th><th>Échéance</th><th>Statut</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var payment in Model)
+        {
+            <tr>
+                <td>@payment.Member?.FirstName @payment.Member?.LastName</td>
+                <td>@payment.FeeType</td>
+                <td>@payment.Amount €</td>
+                <td>@payment.DueDate.ToString("dd/MM/yyyy")</td>
+                <td>@payment.Status</td>
+                <td>
+                    @if (payment.Status != PaymentStatus.Paid)
+                    {
+                        <form asp-action="MarkAsPaid" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="paymentId" value="@payment.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Marquer payé</button>
+                        </form>
+                    }
+                    <a asp-action="Receipt" asp-route-id="@payment.Id" class="btn btn-sm btn-primary">Reçu PDF</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

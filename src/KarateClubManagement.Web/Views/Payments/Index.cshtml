@@ -1,0 +1,27 @@
+@model GradeExam
+
+<h2>Candidats - @Model.Title</h2>
+
+<form method="post" asp-action="RegisterCandidate">
+    <input type="hidden" name="examId" value="@Model.Id" />
+    <div class="mb-3">
+        <label class="form-label">Ajouter un candidat</label>
+        <select name="memberId" class="form-select">
+            @foreach (var member in ViewBag.Members as List<Member>)
+            {
+                <option value="@member.Id">@member.FirstName @member.LastName</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Ajouter</button>
+</form>
+
+<table class="table table-striped mt-3">
+    <thead><tr><th>Membre</th><th>Résultat</th></tr></thead>
+    <tbody>
+        @foreach (var entry in Model.Registrations)
+        {
+            <tr><td>@entry.Member?.FirstName @entry.Member?.LastName</td><td>@entry.Result</td></tr>
+        }
+    </tbody>
+</table>

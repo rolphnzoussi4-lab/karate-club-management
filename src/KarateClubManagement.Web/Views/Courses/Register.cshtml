@@ -1,0 +1,16 @@
+@model Course
+
+<h2>Créer un cours</h2>
+<form asp-action="Create" method="post">
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Nom</label><input asp-for="Name" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Salle</label><input asp-for="Room" class="form-control" /></div>
+        <div class="col-md-4"><label class="form-label">Date</label><input asp-for="Date" class="form-control" type="date" /></div>
+        <div class="col-md-4"><label class="form-label">Heure début</label><input asp-for="StartTime" class="form-control" type="time" /></div>
+        <div class="col-md-4"><label class="form-label">Heure fin</label><input asp-for="EndTime" class="form-control" type="time" /></div>
+        <div class="col-12"><label class="form-label">Description</label><textarea asp-for="Description" class="form-control"></textarea></div>
+        <div class="col-12"><label class="form-label">Entraîneur responsable</label><select asp-for="CoachId" class="form-select" asp-items="ViewBag.Coaches"></select></div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Enregistrer</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Retour</a>
+</form>

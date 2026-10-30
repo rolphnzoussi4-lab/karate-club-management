@@ -1,0 +1,9 @@
+@model Coach
+
+<h2>Supprimer l'entraîneur</h2>
+<div class="alert alert-warning">Voulez-vous vraiment supprimer @Model.FirstName @Model.LastName ?</div>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Confirmer</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+</form>

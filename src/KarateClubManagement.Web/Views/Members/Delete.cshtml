@@ -1,0 +1,19 @@
+@model Member
+
+<h2>Modifier un membre</h2>
+<form asp-action="Edit" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Nom</label><input asp-for="LastName" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Prénom</label><input asp-for="FirstName" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Date de naissance</label><input asp-for="DateOfBirth" class="form-control" type="date" /></div>
+        <div class="col-md-6"><label class="form-label">Sexe</label><select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<Gender>()"></select></div>
+        <div class="col-12"><label class="form-label">Adresse</label><input asp-for="Address" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Téléphone</label><input asp-for="PhoneNumber" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Email</label><input asp-for="Email" class="form-control" type="email" /></div>
+        <div class="col-md-6"><label class="form-label">Grade</label><select asp-for="Grade" class="form-select" asp-items="Html.GetEnumSelectList<Grade>()"></select></div>
+        <div class="col-md-6"><label class="form-label">Date d'inscription</label><input asp-for="DateOfRegistration" class="form-control" type="date" /></div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Enregistrer</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Retour</a>
+</form>

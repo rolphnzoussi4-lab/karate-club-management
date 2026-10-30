@@ -1,0 +1,15 @@
+@model Payment
+
+<h2>Créer un paiement</h2>
+<form asp-action="Create" method="post">
+    <input asp-for="MemberId" type="hidden" />
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Type</label><select asp-for="FeeType" asp-items="Html.GetEnumSelectList<FeeType>()" class="form-select"></select></div>
+        <div class="col-md-6"><label class="form-label">Montant</label><input asp-for="Amount" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Date d'échéance</label><input asp-for="DueDate" type="date" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Statut</label><select asp-for="Status" asp-items="Html.GetEnumSelectList<PaymentStatus>()" class="form-select"></select></div>
+        <div class="col-12"><label class="form-label">Notes</label><textarea asp-for="Notes" class="form-control"></textarea></div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Enregistrer</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Retour</a>
+</form>

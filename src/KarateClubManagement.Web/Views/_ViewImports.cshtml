@@ -1,0 +1,85 @@
+using KarateClubManagement.Business.Models;
+using KarateClubManagement.Business.Services;
+using KarateClubManagement.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace KarateClubManagement.Web.Controllers;
+
+[Authorize(Roles = "Admin,Secretary")]
+public class PaymentsController : Controller
+{
+    private readonly KarateClubDbContext _context;
+    private readonly IPaymentService _paymentService;
+    private readonly IPdfService _pdfService;
+
+    public PaymentsController(KarateClubDbContext context, IPaymentService paymentService, IPdfService pdfService)
+    {
+        _context = context;
+        _paymentService = paymentService;
+        _pdfService = pdfService;
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        var payments = await _context.Payments
+            .Include(p => p.Member)
+            .OrderByDescending(p => p.DueDate)
+            .ToListAsync();
+
+        return View(payments);
+    }
+
+    public async Task<IActionResult> Create(int memberId)
+    {
+        var member = await _context.Members.FindAsync(memberId);
+        if (member is null)
+            return NotFound();
+
+        var payment = new Payment
+        {
+            MemberId = memberId,
+            FeeType = FeeType.Monthly,
+            Amount = 40m,
+            DueDate = DateTime.Today.AddDays(15),
+            Status = PaymentStatus.Pending
+        };
+
+        return View(payment);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Payment payment)
+    {
+        if (!ModelState.IsValid)
+            return View(payment);
+
+        payment.ReceiptNumber = $"PAY-{DateTime.UtcNow:yyyyMMddHHmmss}-{payment.MemberId}";
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarkAsPaid(int paymentId)
+    {
+        await _paymentService.MarkAsPaidAsync(paymentId);
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Receipt(int id)
+    {
+        var payment = await _context.Payments
+            .Include(p => p.Member)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (payment is null || payment.Member is null)
+            return NotFound();
+
+        var pdf = _pdfService.GenerateReceiptPdf(payment, payment.Member);
+        return File(pdf, "application/pdf", $"recu-{payment.Member.LastName}-{payment.Id}.pdf");
+    }
+}

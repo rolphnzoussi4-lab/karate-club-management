@@ -1,0 +1,19 @@
+@model IEnumerable<GradeExam>
+
+<h2>Examens de grade</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Créer un examen</a>
+
+<table class="table table-striped">
+    <thead><tr><th>Titre</th><th>Date</th><th>Lieu</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var exam in Model)
+        {
+            <tr>
+                <td>@exam.Title</td>
+                <td>@exam.ExamDate.ToString("dd/MM/yyyy")</td>
+                <td>@exam.Location</td>
+                <td><a asp-action="Candidates" asp-route-id="@exam.Id" class="btn btn-sm btn-primary">Candidats</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

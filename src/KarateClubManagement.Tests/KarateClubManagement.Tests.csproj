@@ -1,0 +1,10 @@
+CREATE DATABASE KarateClubDb;
+GO
+USE KarateClubDb;
+GO
+
+-- Tables are created automatically by EF Core EnsureCreated() at runtime.
+-- This script is provided for manual deployment and SQL Server administration.
+
+SELECT 'Database KarateClubDb created successfully.' AS Status;
+GO
