@@ -1,65 +1,23 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
 
-namespace KarateClubManagement.Data;
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.8" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
-{
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
-}
-
-public class ApplicationUser : IdentityUser
-{
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-}
-
-public static class SeedData
-{
-    public static async Task InitializeAsync(IServiceProvider serviceProvider)
-    {
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-        var roles = new[] { "Admin", "Coach", "Secretary" };
-        foreach (var role in roles)
-        {
-            if (!await roleManager.RoleExistsAsync(role))
-            {
-                await roleManager.CreateAsync(new IdentityRole(role));
-            }
-        }
-
-        var users = new[]
-        {
-            new { Email = "admin@karateclub.com", Password = "Admin123!", Role = "Admin" },
-            new { Email = "secretary@karateclub.com", Password = "Secret123!", Role = "Secretary" },
-            new { Email = "coach@karateclub.com", Password = "Coach123!", Role = "Coach" }
-        };
-
-        foreach (var userSeed in users)
-        {
-            var user = await userManager.FindByEmailAsync(userSeed.Email);
-            if (user is null)
-            {
-                user = new ApplicationUser
-                {
-                    UserName = userSeed.Email,
-                    Email = userSeed.Email,
-                    FirstName = userSeed.Role,
-                    LastName = "Club"
-                };
-
-                var result = await userManager.CreateAsync(user, userSeed.Password);
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(user, userSeed.Role);
-                }
-            }
-        }
-    }
-}
+  <ItemGroup>
+    <ProjectReference Include="../KarateClubManagement.Business/KarateClubManagement.Business.csproj" />
+    <ProjectReference Include="../KarateClubManagement.Data/KarateClubManagement.Data.csproj" />
+  </ItemGroup>
+</Project>

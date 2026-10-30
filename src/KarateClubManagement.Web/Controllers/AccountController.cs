@@ -1,10 +1,7 @@
-using KarateClubManagement.Business.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KarateClubManagement.Web.Controllers;
 
-[Authorize]
 public class HomeController : Controller
 {
     public IActionResult Index()
@@ -12,6 +9,8 @@ public class HomeController : Controller
         return RedirectToAction("Index", "Dashboard");
     }
 
-    [AllowAnonymous]
-    public IActionResult Error() => View();
+    public IActionResult Error()
+    {
+        return View();
+    }
 }

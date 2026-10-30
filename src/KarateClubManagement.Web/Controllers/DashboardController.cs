@@ -7,16 +7,13 @@ namespace KarateClubManagement.Web.Controllers;
 public class AccountController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly UserManager<ApplicationUser> _userManager;
 
-    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+    public AccountController(SignInManager<ApplicationUser> signInManager)
     {
         _signInManager = signInManager;
-        _userManager = userManager;
     }
 
     [HttpGet]
-    [Route("/login")]
     public IActionResult Login(string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -24,11 +21,10 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    [Route("/login")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
     {
-        var result = await _signInManager.PasswordSignInAsync(email, password, true, false);
+        var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent: true, lockoutOnFailure: false);
         if (result.Succeeded)
         {
             return RedirectToLocal(returnUrl);
@@ -48,8 +44,10 @@ public class AccountController : Controller
 
     private IActionResult RedirectToLocal(string? returnUrl)
     {
-        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
             return Redirect(returnUrl);
+        }
 
         return RedirectToAction("Index", "Dashboard");
     }

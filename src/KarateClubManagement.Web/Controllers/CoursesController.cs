@@ -18,7 +18,7 @@ public class CoachesController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var coaches = await _context.Coaches.OrderBy(c => c.LastName).ToListAsync();
+        var coaches = await _context.Coaches.OrderBy(c => c.LastName).ThenBy(c => c.FirstName).ToListAsync();
         return View(coaches);
     }
 
@@ -39,9 +39,7 @@ public class CoachesController : Controller
     public async Task<IActionResult> Edit(int id)
     {
         var coach = await _context.Coaches.FindAsync(id);
-        if (coach is null)
-            return NotFound();
-
+        if (coach is null) return NotFound();
         return View(coach);
     }
 
@@ -63,9 +61,7 @@ public class CoachesController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var coach = await _context.Coaches.FindAsync(id);
-        if (coach is null)
-            return NotFound();
-
+        if (coach is null) return NotFound();
         return View(coach);
     }
 
@@ -74,8 +70,7 @@ public class CoachesController : Controller
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var coach = await _context.Coaches.FindAsync(id);
-        if (coach is null)
-            return NotFound();
+        if (coach is null) return NotFound();
 
         _context.Coaches.Remove(coach);
         await _context.SaveChangesAsync();

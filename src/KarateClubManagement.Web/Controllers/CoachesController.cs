@@ -22,13 +22,11 @@ public class MembersController : Controller
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(m =>
-                m.FirstName.Contains(search) ||
-                m.LastName.Contains(search) ||
-                m.Email.Contains(search));
+            var q = search.Trim();
+            query = query.Where(m => m.FirstName.Contains(q) || m.LastName.Contains(q) || m.Email.Contains(q));
         }
 
-        var members = await query.OrderBy(m => m.LastName).ToListAsync();
+        var members = await query.OrderBy(m => m.LastName).ThenBy(m => m.FirstName).ToListAsync();
         return View(members);
     }
 
@@ -39,7 +37,9 @@ public class MembersController : Controller
     public async Task<IActionResult> Create(Member member)
     {
         if (!ModelState.IsValid)
+        {
             return View(member);
+        }
 
         member.DateOfRegistration = DateTime.Today;
         _context.Members.Add(member);
@@ -50,9 +50,7 @@ public class MembersController : Controller
     public async Task<IActionResult> Edit(int id)
     {
         var member = await _context.Members.FindAsync(id);
-        if (member is null)
-            return NotFound();
-
+        if (member is null) return NotFound();
         return View(member);
     }
 
@@ -74,9 +72,7 @@ public class MembersController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var member = await _context.Members.FindAsync(id);
-        if (member is null)
-            return NotFound();
-
+        if (member is null) return NotFound();
         return View(member);
     }
 
@@ -85,8 +81,7 @@ public class MembersController : Controller
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var member = await _context.Members.FindAsync(id);
-        if (member is null)
-            return NotFound();
+        if (member is null) return NotFound();
 
         _context.Members.Remove(member);
         await _context.SaveChangesAsync();

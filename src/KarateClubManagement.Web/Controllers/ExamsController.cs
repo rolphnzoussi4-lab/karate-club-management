@@ -38,7 +38,10 @@ public class CoursesController : Controller
     public async Task<IActionResult> Create(Course course)
     {
         if (!ModelState.IsValid)
+        {
+            ViewBag.Coaches = new SelectList(await _context.Coaches.ToListAsync(), "Id", "FirstName");
             return View(course);
+        }
 
         _context.Courses.Add(course);
         await _context.SaveChangesAsync();
@@ -52,10 +55,9 @@ public class CoursesController : Controller
             .ThenInclude(r => r.Member)
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (course is null)
-            return NotFound();
+        if (course is null) return NotFound();
 
-        ViewBag.Members = await _context.Members.ToListAsync();
+        ViewBag.Members = await _context.Members.OrderBy(m => m.LastName).ToListAsync();
         return View(course);
     }
 
@@ -63,9 +65,7 @@ public class CoursesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(int id, int memberId)
     {
-        var exists = await _context.CourseRegistrations
-            .AnyAsync(r => r.CourseId == id && r.MemberId == memberId);
-
+        var exists = await _context.CourseRegistrations.AnyAsync(r => r.CourseId == id && r.MemberId == memberId);
         if (!exists)
         {
             _context.CourseRegistrations.Add(new CourseRegistration
@@ -88,9 +88,27 @@ public class CoursesController : Controller
             .ThenInclude(r => r.Member)
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (course is null)
-            return NotFound();
+        if (course is null) return NotFound();
 
         return View(course);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Attendance(int id, int memberId, bool isPresent)
+    {
+        var attendance = await _context.Attendances.FirstOrDefaultAsync(a => a.CourseId == id && a.MemberId == memberId);
+        if (attendance is null)
+        {
+            attendance = new Attendance { CourseId = id, MemberId = memberId, IsPresent = isPresent };
+            _context.Attendances.Add(attendance);
+        }
+        else
+        {
+            attendance.IsPresent = isPresent;
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Attendance), new { id });
     }
 }

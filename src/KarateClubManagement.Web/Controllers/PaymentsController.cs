@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KarateClubManagement.Web.Controllers;
 
-[Authorize(Roles = "Admin,Secretary,Coach")]
+[Authorize(Roles = "Admin,Coach,Secretary")]
 public class ExamsController : Controller
 {
     private readonly KarateClubDbContext _context;
@@ -18,9 +18,7 @@ public class ExamsController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var exams = await _context.GradeExams
-            .OrderBy(e => e.ExamDate)
-            .ToListAsync();
+        var exams = await _context.GradeExams.OrderBy(e => e.ExamDate).ToListAsync();
         return View(exams);
     }
 
@@ -45,10 +43,9 @@ public class ExamsController : Controller
             .ThenInclude(r => r.Member)
             .FirstOrDefaultAsync(e => e.Id == id);
 
-        if (exam is null)
-            return NotFound();
+        if (exam is null) return NotFound();
 
-        ViewBag.Members = await _context.Members.ToListAsync();
+        ViewBag.Members = await _context.Members.OrderBy(m => m.LastName).ToListAsync();
         return View(exam);
     }
 

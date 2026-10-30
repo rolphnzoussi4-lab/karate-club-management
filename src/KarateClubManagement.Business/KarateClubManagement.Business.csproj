@@ -1,16 +1,171 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="QuestPDF" Version="2024.10.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../KarateClubManagement.Data/KarateClubManagement.Data.csproj" />
-  </ItemGroup>
-</Project>
+using System;
+using System.Collections.Generic;
+
+namespace KarateClubManagement.Business.Models;
+
+public enum Gender
+{
+    Male,
+    Female,
+    Other
+}
+
+public enum Grade
+{
+    White,
+    Yellow,
+    Orange,
+    Green,
+    Blue,
+    Brown,
+    Black
+}
+
+public enum FeeType
+{
+    Monthly,
+    Annual
+}
+
+public enum PaymentStatus
+{
+    Pending,
+    Paid,
+    Late
+}
+
+public class Member
+{
+    public int Id { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public DateTime DateOfBirth { get; set; }
+    public Gender Gender { get; set; }
+    public string Address { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public Grade Grade { get; set; }
+    public DateTime DateOfRegistration { get; set; } = DateTime.Today;
+
+    public List<GradeHistoryEntry> GradeHistory { get; set; } = new();
+    public List<CourseRegistration> CourseRegistrations { get; set; } = new();
+    public List<GradeExamRegistration> GradeExamRegistrations { get; set; } = new();
+    public List<Payment> Payments { get; set; } = new();
+}
+
+public class GradeHistoryEntry
+{
+    public int Id { get; set; }
+    public int MemberId { get; set; }
+    public Grade Grade { get; set; }
+    public DateTime AchievedDate { get; set; }
+    public string Notes { get; set; } = string.Empty;
+    public Member Member { get; set; } = null!;
+}
+
+public class Coach
+{
+    public int Id { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Speciality { get; set; } = string.Empty;
+    public Grade Grade { get; set; }
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public DateTime DateOfHire { get; set; } = DateTime.Today;
+
+    public List<Course> Courses { get; set; } = new();
+}
+
+public class Course
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public DateTime Date { get; set; }
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan EndTime { get; set; }
+    public string Room { get; set; } = string.Empty;
+    public int CoachId { get; set; }
+    public Coach Coach { get; set; } = null!;
+    public string Description { get; set; } = string.Empty;
+
+    public List<CourseRegistration> Registrations { get; set; } = new();
+    public List<Attendance> Attendances { get; set; } = new();
+}
+
+public class CourseRegistration
+{
+    public int Id { get; set; }
+    public int CourseId { get; set; }
+    public int MemberId { get; set; }
+    public DateTime RegisteredAt { get; set; } = DateTime.Now;
+    public string Status { get; set; } = "Registered";
+
+    public Course Course { get; set; } = null!;
+    public Member Member { get; set; } = null!;
+}
+
+public class Attendance
+{
+    public int Id { get; set; }
+    public int CourseId { get; set; }
+    public int MemberId { get; set; }
+    public bool IsPresent { get; set; }
+    public string Notes { get; set; } = string.Empty;
+
+    public Course Course { get; set; } = null!;
+    public Member Member { get; set; } = null!;
+}
+
+public class GradeExam
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public DateTime ExamDate { get; set; }
+    public string Location { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+
+    public List<GradeExamRegistration> Registrations { get; set; } = new();
+}
+
+public class GradeExamRegistration
+{
+    public int Id { get; set; }
+    public int ExamId { get; set; }
+    public int MemberId { get; set; }
+    public DateTime RegistrationDate { get; set; } = DateTime.Today;
+    public bool IsAccepted { get; set; }
+    public string Result { get; set; } = string.Empty;
+
+    public GradeExam Exam { get; set; } = null!;
+    public Member Member { get; set; } = null!;
+}
+
+public class Payment
+{
+    public int Id { get; set; }
+    public int MemberId { get; set; }
+    public Member Member { get; set; } = null!;
+    public FeeType FeeType { get; set; }
+    public decimal Amount { get; set; }
+    public DateTime DueDate { get; set; }
+    public DateTime? PaidDate { get; set; }
+    public PaymentStatus Status { get; set; }
+    public string ReceiptNumber { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
+}
+
+public class DashboardSummaryViewModel
+{
+    public int TotalMembers { get; set; }
+    public decimal MonthlyRevenue { get; set; }
+    public List<GradeDistributionItem> GradeDistribution { get; set; } = new();
+    public List<Course> UpcomingCourses { get; set; } = new();
+    public List<Payment> LatePayments { get; set; } = new();
+}
+
+public class GradeDistributionItem
+{
+    public string Grade { get; set; } = string.Empty;
+    public int Count { get; set; }
+}
