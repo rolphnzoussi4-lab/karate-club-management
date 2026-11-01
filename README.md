@@ -20,40 +20,45 @@ Application ASP.NET Core MVC pour la gestion d'un club de karaté avec Entity Fr
 
 ## Prérequis
 - .NET 8 SDK
-- SQL Server 2019+ ou SQL Server Express
+- Docker Desktop (recommandé sur macOS / Linux)
+- SQL Server 2022 via Docker ou un serveur SQL accessible
 - Git
-- Visual Studio 2022 / VS Code / Rider
 
-## Installation
-1. Cloner le dépôt
-2. Créer la base de données SQL Server
-3. Configurer la chaîne de connexion dans `src/KarateClubManagement.Web/appsettings.json`
-4. Restaurer les dépendances :
+## Installation rapide sur macOS / Linux
+1. Démarrer SQL Server dans Docker :
+   ```bash
+   docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2022-latest
+   ```
+2. Vérifier que le conteneur tourne :
+   ```bash
+   docker ps
+   ```
+3. Restaurer les dépendances :
    ```bash
    dotnet restore
    ```
-5. Lancer l'application :
+4. Démarrer l'application sur HTTP :
    ```bash
-   dotnet run --project src/KarateClubManagement.Web/KarateClubManagement.Web.csproj
+   dotnet run --project src/KarateClubManagement.Web/KarateClubManagement.Web.csproj --urls http://localhost:5173
    ```
+5. Ouvrir dans Safari :
+   `http://localhost:5173`
 
-## Base de données
-Le projet utilise `EnsureCreated()` au démarrage pour créer la base de données si elle n'existe pas.
-Les scripts SQL sont disponibles dans le dossier `database/`.
+## Configuration SQL Server
+Le projet utilise par défaut un serveur SQL accessible sur :
+`Server=localhost,1433;Database=KarateClubDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true`
 
 ## Comptes d'accès par défaut
 - Admin : `admin@karateclub.com` / `Admin123!`
 - Sécrétaire : `secretary@karateclub.com` / `Secret123!`
 - Entraîneur : `coach@karateclub.com` / `Coach123!`
 
-## Déploiement GitHub
-Le dépôt est préparé pour être publié sur GitHub avec un commit initial et la structure du projet prête à l'emploi.
+## Base de données
+Le projet utilise `EnsureCreated()` au démarrage pour créer la base de données si elle n'existe pas.
+Les scripts SQL sont disponibles dans le dossier `database/`.
 
-## Documentation technique
-- `database/create_database.sql`
-- `src/KarateClubManagement.Web/Program.cs`
-- `src/KarateClubManagement.Data/KarateClubDbContext.cs`
-- `src/KarateClubManagement.Business/Services/`
+## Déploiement GitHub
+Le dépôt est prêt pour publication et continuation du développement.
 
 ## Licence
 MIT
